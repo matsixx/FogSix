@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>FogSix</RootNamespace>
+    <AssemblyName>FogSix</AssemblyName>
+    <Nullable>disable</Nullable>
+    <Authors>matsix</Authors>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
+    <Version>$(AssemblyVersion)</Version>
+    <Configurations>Debug;Release</Configurations>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Assets\**" />
+    <EmbeddedResource Remove="Assets\**" />
+    <None Remove="Assets\**" />
+  </ItemGroup>
+
+  <!-- The Assets/ folder holds the shader + editor tester (source for the AssetBundle), not C# to compile. -->
+
+  <!-- References resolve from the local libs/ folder (DLLs copied from the game Managed + BepInEx) so the
+       project builds standalone. CloudSix points these at ..\..\BepInEx / ..\..\EscapeFromTarkov_Data, which
+       only works when the project lives inside the SPT install tree; swap the HintPaths if you prefer that. -->
+  <ItemGroup>
+    <Reference Include="0Harmony"><HintPath>libs\0Harmony.dll</HintPath></Reference>
+    <Reference Include="spt-reflection"><HintPath>libs\spt-reflection.dll</HintPath></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>libs\Assembly-CSharp.dll</HintPath></Reference>
+    <Reference Include="BepInEx"><HintPath>libs\BepInEx.dll</HintPath></Reference>
+    <Reference Include="Comfort"><HintPath>libs\Comfort.dll</HintPath></Reference>
+    <Reference Include="Comfort.Unity"><HintPath>libs\Comfort.Unity.dll</HintPath></Reference>
+    <Reference Include="UnityEngine"><HintPath>libs\UnityEngine.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>libs\UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.AssetBundleModule"><HintPath>libs\UnityEngine.AssetBundleModule.dll</HintPath></Reference>
+  </ItemGroup>
+  <!-- Auto-deploy: EVERY build (Debug or Release) copies the DLL straight into the game, so there is
+       never a stale-DLL / wrong-folder question - the game always runs whatever was built last.
+       Skipped silently when the game folder doesn't exist (e.g. building on another machine). -->
+  <Target Name="DeployToGame" AfterTargets="Build" Condition="Exists('F:\SPT4.0\BepInEx\plugins\FogSix')">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="F:\SPT4.0\BepInEx\plugins\FogSix" />
+    <Message Importance="high" Text="==&gt; FogSix.dll deployed to F:\SPT4.0\BepInEx\plugins\FogSix" />
+  </Target>
+  <Target Name="DeployToGame41" AfterTargets="Build" Condition="Exists('F:\SPT4.1\BepInEx\plugins\FogSix')">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="F:\SPT4.1\BepInEx\plugins\FogSix" />
+    <Message Importance="high" Text="==&gt; FogSix.dll deployed to F:\SPT4.1\BepInEx\plugins\FogSix" />
+  </Target>
+
+</Project>
