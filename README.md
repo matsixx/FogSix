@@ -1,55 +1,99 @@
 # FogSix
 
-A BepInEx plugin for **Single Player Tarkov (SPT)** that replaces Tarkov's screen-space atmospheric fog
-(TOD_Scattering) with a custom **volumetric raymarched fog**. Flatscreen mod — the VR build lives in SPT-VR.
-(Sibling to [CloudSix](../SPT-Cloud-Revamp); the repo folder is `SPT-VolumetricFog`, the mod is `FogSix`.)
+Volumetric fog for Single Player Tarkov. FogSix replaces Tarkov's flat screen-space fog with real volumetric
+fog that fills the world: it pools in valleys, glows around the sun, catches god rays through the trees and
+lights up around your flashlight. Works on flatscreen and in VR.
 
-It disables TOD's scattering and draws its own fog, reading the live values straight off the game:
-- **Density** from the weather (`WeatherController.WeatherCurve.Fog`) — clear weather = no fog, foggy weather
-  = thick. This is the *same* value SAIN/EFT use to reduce bot vision in fog, so the fog you see only appears
-  when the AI's sight is already cut — it stays fair instead of fogging you in while bots see clear.
-  (`TOD_Scattering.GlobalDensity` is pinned static in this build because MBOIT — the real volumetric fog — is
-  disabled and never receives the weather value, so it can't be used as the source.)
-- **Colour** from the sky (`SunSkyColor` by day / `MoonSkyColor` by night) — properly exposed, matches the
-  horizon haze. (TOD's raw atmosphere/`SampleFogColor` values are tiny pre-exposure numbers that read grey.)
-- **Wind** from `WeatherController.WeatherCurve.Wind` — the fog drifts with the weather.
-- **Sun/moon glow direction** from TOD's `TOD_LightDirection` global.
+Support my work on Ko-fi: https://ko-fi.com/matsix
 
-The fog is a world-space raymarch with height falloff (thick low, thinning with altitude — clear straight
-up, foggy toward the horizon), a 3-octave value-noise for wispiness, and an HG sun in-scatter glow.
+The fog follows the game's own weather. It only gets thick when the weather calls for fog, which is the same
+value the game and SAIN use to cut bot vision. By default your visibility in heavy fog roughly matches the
+bots', so the fog stays fair.
+
+## Features
+
+- **True volumetric fog:** density and lighting are computed in a 3D volume around the camera, so the fog is stable and smooth with no per-pixel noise.
+- **Weather-driven:** density follows the raid's fog weather, and the fog drifts with the weather's wind.
+- **Ground fog:** the dense layer sits at the map's ground level and thins with altitude. You can climb a hill or building and look down on it.
+- **Sun and moon glow** coloured by the sky, warming toward sunset.
+- **God rays:** trees and buildings cast light shafts through the fog, with drifting dust in the beams.
+- **Local lights:** flashlights, lamps and flares light up the fog around them.
+- **Interiors:** fog thins inside buildings using the game's own indoor volumes. It clears correctly through windows and in large rooms.
+- **Volumetric glass:** windows are fogged at their own distance, so glass blends into the fog instead of standing out.
+- **Optional ground mist:** a thin wispy layer that drifts between the trees.
+- **VR:** each eye renders correctly. With SPT-VR installed, turning FogSix off removes Tarkov's fog entirely, since the vanilla fog renders wrong in stereo.
+
+## Requirements
+
+- SPT 4.0 or 4.1.
 
 ## Install
 
-1. Copy `FogSix.dll` to `BepInEx/plugins/FogSix/`.
-2. Copy the `volfog` AssetBundle to `BepInEx/plugins/FogSix/Assets/volfog`.
-3. Launch. Tune in the BepInEx config (`com.matsix.fogsix.cfg`) or a config manager.
+1. Extract the release into your SPT folder. You should end up with:
+   ```
+   BepInEx/plugins/FogSix/FogSix.dll
+   BepInEx/plugins/FogSix/Assets/volfog
+   ```
+2. Launch the game.
 
-## Build
+## Settings
 
-### The plugin DLL
+Open the in-game configuration manager (F12) or edit `BepInEx/config/com.matsix.fogsix.cfg`.
+These are the main ones. The Advanced view has many more.
+
+| Setting | Default | What it does |
+|---|---|---|
+| Enabled | On | Off restores Tarkov's fog on flatscreen. In VR it removes the fog. |
+| Density Scale | 0.03 | How thick the fog gets at full fog. Raising it makes fog thicker than what the bots experience. |
+| Ground Fog | On | Anchors the fog layer to the map's ground. Off makes it follow your height. |
+| Height Falloff | 0.04 | How quickly the fog thins with altitude. Smaller makes a taller layer. |
+| Height Offset | 0 | Raises or lowers the fog layer. |
+| Wispiness | 1 | 0 is a uniform haze, 1 is fully wispy. |
+| Sun Glow / Moon Glow | 1 / 1 | Strength of the glow around the sun and moon. |
+| Ground Mist | Off | The low mist layer, with its own height and density settings. |
+| Local Lights | On | Lights glowing in the fog. |
+| Max Lights | 24 | How many lights can glow at once. The most important nearby lights win. |
+| Sun Shadows | On | God rays. |
+| Interior Fog Thinning | On | Thins the fog indoors. |
+| Interior Reduction | 0.8 | How much it thins. 1 is fully clear indoors. |
+| Volumetric Glass | On | Windows fog from the volumetric fog. |
+| Max Distance | 2000 | How far the fog reaches, in metres. |
+| Froxel Resolution | High | Detail of the fog volume. Medium is usually plenty. |
+| Temporal Smoothing | 0.95 | Frame-to-frame smoothing. 0.9 to 0.95 is recommended. |
+
+## Performance
+
+The fog volume is small, so the cost is mostly fixed. If you need frames back:
+
+- Set **Froxel Resolution** to Medium or Low.
+- Lower **Max Lights**, which matters most on light-heavy maps like Streets.
+- Turn off **Sun Shadows**.
+
+## Compatibility
+
+- **SAIN:** the default density is matched to SAIN's fog penalty on bot vision.
+- **SPT-VR:** FogSix is the fog SPT-VR uses.
+
+## Building from source
+
 ```sh
-dotnet build -c Release
+dotnet build FogSix.csproj -c Release
 ```
-Output: `bin/Release/netstandard2.1/FogSix.dll`. References resolve from the local `libs/` folder (DLLs
-copied from the game's `Managed` + BepInEx). If you prefer CloudSix's convention (referencing
-`..\..\BepInEx` / `..\..\EscapeFromTarkov_Data`), swap the HintPaths in `FogSix.csproj` and place the
-project inside the SPT install tree.
 
-### The shader bundle (`volfog`)
-The fog shader can't be compiled at runtime, so it ships as an AssetBundle:
-1. In a Unity project, drop `Assets/VolumetricFog.shader` in.
-2. Create a Material from it named **`volFogMat`**.
-3. Assign the shader + material to an AssetBundle named **`volfog`** and build it.
-4. Put the built `volfog` file in `BepInEx/plugins/FogSix/Assets/`.
+The project references the game's DLLs from a local `libs/` folder that isn't in the repository. Copy these
+into it from your SPT install:
 
-`Assets/VolFogTester.cs` is an editor-only driver: attach it to a camera with the material assigned to
-tune the look live in the Unity editor (drop in a Time of Day sky dome so the colours are live). It's the
-same bundle SPT-VR uses, so a single shader build serves both mods.
+- From `EscapeFromTarkov_Data/Managed`: `Assembly-CSharp.dll`, `Comfort.dll`, `Comfort.Unity.dll`, `UnityEngine.dll`, `UnityEngine.CoreModule.dll`, `UnityEngine.AssetBundleModule.dll`
+- From `BepInEx/core`: `0Harmony.dll`, `BepInEx.dll`
+- From `BepInEx/plugins/spt`: `spt-reflection.dll`
 
-## Layout
+The fog and glass shaders ship compiled in the `volfog` bundle in each release. Their source isn't part of
+this repository.
 
-- **`Plugin.cs`** — BepInEx entry; binds config, enables the patch.
-- **`Patches/FogScatteringPatch.cs`** — hooks `TOD_Scattering.OnRenderImageNormalMode` (SPT `ModulePatch`).
-- **`Source/FogRenderer.cs`** — loads the bundle, reads TOD values, does the fog blit.
-- **`Source/FogConfig.cs`** — BepInEx config.
-- **`Assets/`** — the shader + editor tester (source for the bundle; not compiled into the DLL).
+## Credits
+
+- The froxel technique follows Sébastien Hillaire's "Physically Based and Unified Volumetric Rendering in Frostbite" (2015).
+
+## License
+
+The code in this repository is licensed under the GNU General Public License v3.0. See `LICENSE.txt`.
