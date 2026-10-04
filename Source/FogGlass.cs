@@ -36,7 +36,7 @@ namespace FogSix.Source
         public static void Apply(Material[] mats)
         {
             if (mats == null) return;
-            LogHistogram(mats);
+            if (FogConfig.Debug.Value) LogHistogram(mats);
             if (!FogConfig.VolumetricGlass.Value) { RestoreAll(); return; }
             if (_broken || _ours.Count == 0) return;
             int swapped = 0;

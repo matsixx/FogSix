@@ -652,9 +652,9 @@ namespace FogSix.Source
                 }
                 _mat = bundle.LoadAsset<Material>("volFogMat");
                 if (_mat == null)
-                    Plugin.MyLog.LogError("[VolFog] 'volFogMat' material not found in bundle.");
+                    Plugin.MyLog.LogError("[FogSix] 'volFogMat' material not found in bundle.");
                 else
-                    Plugin.MyLog.LogInfo("[VolFog] Material loaded.");
+                    Plugin.MyLog.LogInfo("[FogSix] Material loaded.");
                 FogGlass.TakeShaders(bundle.LoadAllAssets<Shader>());   // the window-shader port, if the bundle has it
                 bundle.Unload(false); // keep the shader/material in memory
             }

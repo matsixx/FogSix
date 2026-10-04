@@ -6,7 +6,7 @@
     <AssemblyName>FogSix</AssemblyName>
     <Nullable>disable</Nullable>
     <Authors>matsix</Authors>
-    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Version>$(AssemblyVersion)</Version>
     <Configurations>Debug;Release</Configurations>
@@ -28,13 +28,6 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="Assets\**" />
-    <EmbeddedResource Remove="Assets\**" />
-    <None Remove="Assets\**" />
-  </ItemGroup>
-
-  <!-- The Assets/ folder holds the shader + editor tester (source for the AssetBundle), not C# to compile. -->
 
   <!-- References resolve from the local libs/ folder (DLLs copied from the game Managed + BepInEx) so the
        project builds standalone. CloudSix points these at ..\..\BepInEx / ..\..\EscapeFromTarkov_Data, which

@@ -236,8 +236,8 @@ namespace FogSix.Source
                     new AcceptableValueRange<int>(1, FogLights.MAX)));
 
             SunShadows = config.Bind("Sun Shadows", "Sun Shadows", true,
-                "EXPERIMENTAL god rays: shadow the sun's glow in the fog where trees/buildings block it, so you " +
-                "get shafts of light. Samples the sun's shadow map. Off by default while it's being dialed in.");
+                "God rays: shadow the sun's glow in the fog where trees/buildings block it, so you get shafts " +
+                "of light. Samples the sun's shadow map.");
             SunShadowStrength = config.Bind("Sun Shadows", "Shadow Strength", 1f,
                 new ConfigDescription("How dark the shadowed shafts are. 0 = no shadowing, 1 = full.",
                     new AcceptableValueRange<float>(0f, 1f)));
@@ -319,16 +319,18 @@ namespace FogSix.Source
                     "where any RGB is set. Building interiors should light up. If they're RED set Mask Channel " +
                     "to 3; if GREEN set it to 4. Turn this off once picked."));
 
+            // The older analytic glass fog. Volumetric Glass (below) replaced it, so these sit in Advanced.
             TransparentFog = config.Bind("Look", "Fog Transparents", false,
-                "Fog glass/windows. They fog analytically from the game's _Density global, which our fog patch " +
-                "leaves stale; we drive it ourselves, weather-matched to the volumetric fog.");
+                Adv("Older analytic glass fog, replaced by Volumetric Glass. Fogs glass/windows from the game's " +
+                    "_Density global, which our fog patch leaves stale; we drive it ourselves, weather-matched " +
+                    "to the volumetric fog."));
             TransparentFogScale = config.Bind("Look", "Transparent Fog Density", 0.025f,
-                new ConfigDescription("Density of the fog on glass at FULL fog. Raise = thicker glass haze. " +
+                Adv("Density of the fog on glass at FULL fog (Fog Transparents). Raise = thicker glass haze. " +
                     "(The game's own value is pinned near-zero, so we drive it ourselves.) 0 = off.",
                     new AcceptableValueRange<float>(0f, 0.3f)));
             TransparentFogBrightness = config.Bind("Look", "Transparent Fog Brightness", 1f,
-                new ConfigDescription("Brightness of the glass fog colour. The sky-derived colour is HDR-bright and " +
-                    "blows out the glass's additive in-scatter — lower this if the glass over-brightens.",
+                Adv("Brightness of the glass fog colour (Fog Transparents). The sky-derived colour is HDR-bright " +
+                    "and blows out the glass's additive in-scatter — lower this if the glass over-brightens.",
                     new AcceptableValueRange<float>(0f, 2f)));
 
             VolumetricGlass = config.Bind("Look", "Volumetric Glass", true,
