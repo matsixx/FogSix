@@ -10,6 +10,11 @@ The fog follows the game's own weather. It only gets thick when the weather call
 value the game and SAIN use to cut bot vision. By default your visibility in heavy fog roughly matches the
 bots', so the fog stays fair.
 
+Releases here include a server side mod I made specifically for FogSix: https://github.com/matsixx/SPT-DynamicFog
+
+This is included because base SPT has fog pretty much disabled. You can use the base game fog if you re-enable it in the SPT config instead of using
+this server side mod that's included. I would recommend using the mod though because it makes the fog a lot more dynamic and helps to make the fog shine more.
+
 ## Features
 
 - **True volumetric fog:** density and lighting are computed in a 3D volume around the camera, so the fog is stable and smooth with no per-pixel noise.
