@@ -17,16 +17,15 @@ this server side mod that's included. I would recommend using the mod though bec
 
 ## Features
 
-- **True volumetric fog:** density and lighting are computed in a 3D volume around the camera, so the fog is stable and smooth with no per-pixel noise.
-- **Weather-driven:** density follows the raid's fog weather, and the fog drifts with the weather's wind.
-- **Ground fog:** the dense layer sits at the map's ground level and thins with altitude. You can climb a hill or building and look down on it.
-- **Sun and moon glow** coloured by the sky, warming toward sunset.
-- **God rays:** trees and buildings cast light shafts through the fog, with drifting dust in the beams.
-- **Local lights:** flashlights, lamps and flares light up the fog around them.
-- **Interiors:** fog thins inside buildings using the game's own indoor volumes. It clears correctly through windows and in large rooms.
-- **Volumetric glass:** windows are fogged at their own distance, so glass blends into the fog instead of standing out.
-- **Optional ground mist:** a thin wispy layer that drifts between the trees.
-- **VR:** each eye renders correctly. With SPT-VR installed, turning FogSix off removes Tarkov's fog entirely, since the vanilla fog renders wrong in stereo.
+- Froxel based volumetric fog that is height aware
+- Fog reduction/removal in interiors
+- Comes with a server mod that controls fog and makes it more dynamic to work better and make the fog stand out how it should (probably still needs tweaking, you can adjust probabilities in the config.json)
+- Connected to SPT's weather so it follows base game fog density and wind
+- Fog color shaded based on sky/sun/moon color
+- God rays with dust/mist in the shafts when there is fog
+- Lights light up the fog, so flashlights will project a cone in fog, same for any other lights around the world
+- Glass/transparents are properly occluded by fog
+- Compatible with VR
 
 ## Requirements
 
