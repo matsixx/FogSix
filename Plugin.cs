@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace FogSix
 {
-    [BepInPlugin("com.matsix.fogsix", "FogSix", "1.0.0")]
+    [BepInPlugin("com.matsix.fogsix", "FogSix", "1.0.1")]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource MyLog;

@@ -15,8 +15,10 @@ namespace FogSix.Source
         private const string Canary = "_FogSixGlass";
 
         private static readonly Dictionary<string, Shader> _ours = new Dictionary<string, Shader>();   // suffix -> port
-        private static readonly Dictionary<int, Shader> _orig = new Dictionary<int, Shader>();        // material id -> game shader
-        private static readonly Dictionary<int, Material> _swapped = new Dictionary<int, Material>();
+        // material id -> game shader. By id, not by Material: a list of the materials themselves kept every glass
+        // material ever swapped (and its textures) loaded after its map was gone - the game frees a map with
+        // Resources.UnloadUnusedAssets, which leaves alone what a static field still reaches.
+        private static readonly Dictionary<int, Shader> _orig = new Dictionary<int, Shader>();
         private static bool _broken;
         private static int _histogramScene = -1;
 
@@ -63,29 +65,26 @@ namespace FogSix.Source
                     RestoreAll();
                     return;
                 }
-                int id = m.GetInstanceID();
-                _orig[id] = previous;
-                _swapped[id] = m;
+                _orig[m.GetInstanceID()] = previous;
                 swapped++;
             }
             if (swapped > 0)
-                Plugin.MyLog.LogInfo("[FogSix] Volumetric glass shader swapped onto " + swapped + " materials (" + _swapped.Count + " total)");
+                Plugin.MyLog.LogInfo("[FogSix] Volumetric glass shader swapped onto " + swapped + " materials (" + _orig.Count + " total)");
         }
 
         public static void RestoreAll()
         {
+            if (_orig.Count == 0) return;
             int n = 0;
-            foreach (KeyValuePair<int, Material> kv in _swapped)
+            foreach (Material m in Resources.FindObjectsOfTypeAll<Material>())
             {
-                Material m = kv.Value;
-                if (m == null || !_orig.TryGetValue(kv.Key, out Shader orig) || orig == null) continue;
+                if (m == null || m.shader == null || !_orig.TryGetValue(m.GetInstanceID(), out Shader orig) || orig == null) continue;
                 if (!m.shader.name.StartsWith(OurPrefix)) continue;
                 int queue = m.renderQueue;
                 m.shader = orig;
                 m.renderQueue = queue;
                 n++;
             }
-            _swapped.Clear();
             _orig.Clear();
             if (n > 0) Plugin.MyLog.LogInfo("[FogSix] Restored the game's glass shader on " + n + " materials");
         }

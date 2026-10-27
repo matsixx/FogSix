@@ -76,6 +76,7 @@ namespace FogSix.Source
         {
             if (_sun != null && _cmd != null) // Unity != null is false for a destroyed light
                 _sun.RemoveCommandBuffer(LightEvent.AfterShadowMap, _cmd);
+            _cmd?.Release();
             _cmd = null;
         }
     }
